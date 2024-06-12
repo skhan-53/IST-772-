@@ -1,0 +1,70 @@
+---
+title: "Homework 4"
+author: "Sana Khan"
+date: "2022-10-30"
+output: html_document
+---
+
+I consulted with our textbook to produce the below materials
+
+Question 7:
+The built‐in PlantGrowth data set contains three different groups, each representing a different plant food diet (you may need to type data(PlantGrowth) to activate it). The group labeled “ctrl” is the control group, while the other two groups are each a different type of experimental treatment. Run the summary() command on PlantGrowth and explain the output. Create a histogram of the ctrl group. As a hint about R syntax, here is one way that you can access the ctrl group data:
+
+PlantGrowth$weight[PlantGrowth$group==”ctrl”]
+
+Also create histograms of the trt1 and trt2 groups. What can you say about the differences in the groups by looking at the histograms? 
+
+
+```{r}
+data(PlantGrowth)
+summary(PlantGrowth)
+
+ctrl <- PlantGrowth$weight[PlantGrowth$group=="ctrl"]
+hist(ctrl)
+
+
+trt1 <-PlantGrowth$weight[PlantGrowth$group=="trt1"]
+hist(trt1)
+
+trt2 <-PlantGrowth$weight[PlantGrowth$group=="trt2"]
+hist(trt2)
+
+```
+The summary command provides us with the two variables, weight and group, and the quartiles as well as the central tendancy measures. Based on the dataset there is not a lot of dispersion, and the mean is less than the median which signifies our data skews left. The three histograms are also different than each other showing that each group reacted differently, with the trt1 group having the most dispersion compared to the other groups. Trt2 seems to have the highest values out of three groups, which could signify whatever treatment was used is most effective. The ctrl group has the second highest dispersion with results that skew left.
+
+
+
+Question 8:
+
+Create a boxplot of the plant growth data, using the model “weight ~ group.” What can you say about the differences in the groups by looking at the boxplots for the dif‐ ferent groups?
+
+```{r}
+boxplot(weight ~ group, data=PlantGrowth) 
+```
+The box plots further support what was infered from the histogram. Trt1 has the widest dispersion with an outlier present as well. Trt2 has the least dispersion with the highest values compared to the other groups and the control goup also has a wider dispersion than the trt2 group but still has overall higher values than trt1. It seems that trt2 has the best results given that the plants weight was the most for this group. Trt1 seems to have performed with the weights being less than the ctrl group, so it could mean this is not as effective as the other groups.  
+
+
+
+
+
+Question 9
+ Run a t‐test to compare the means of ctrl and trt1 in the PlantGrowth data. Report and interpret the confidence interval. Make sure to include a carefully worded statement about what the confidence interval implies with respect to the population mean differ‐ ence between the ctrl and trt1 groups
+
+```{r}
+t.test(PlantGrowth$weight[PlantGrowth$group=='ctrl'],PlantGrowth$weight[PlantGrowth$group=='trt1'])
+
+
+```
+
+In this case the confidence interval does fall over 0 which shows there is not a significant difference among the two samples. The confidence interval also shows us that overall the long run, 95% of our population means will lie in the range between -.0288 and 1.03. 
+
+
+Question 10
+Run a t‐test to compare the means of ctrl and trt2 in the PlantGrowth data. Report and interpret the confidence interval.
+
+```{r}
+t.test(PlantGrowth$weight[PlantGrowth$group=='ctrl'],PlantGrowth$weight[PlantGrowth$group=='trt2'])
+
+```
+In this case the confidence interval does not cross  0 which shows there is a  difference among the two samples. The confidence interval also shows us that overall the long run, 95% of our population means will lie in the range between -.0988 and  - .005. 
+

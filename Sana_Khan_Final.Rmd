@@ -1,0 +1,256 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*.
+
+```{r}
+#load in the datasets 
+district6 <- load("/Users/gozi/Downloads/districts6.RData")
+#districts
+
+schools <- load("/Users/gozi/Downloads/allSchoolsReportStatus.RData")
+
+
+#allSchoolsReportStatus
+
+
+vaccines <- load("/Users/gozi/Downloads/usVaccines.RData")
+
+
+#usVaccines
+
+
+```
+
+Question 1
+
+1.  How have U.S. vaccination rates varied over time? Are vaccination rates increasing or decreasing? Which vaccination has the highest rate at the conclusion of the time series? Which vaccination has the lowest rate at the conclusion of the time series? Which vaccine has the greatest volatility?
+
+```{r}
+
+summary(usVaccines)
+
+plot(usVaccines)
+
+boxplot(usVaccines)
+
+library(changepoint)
+vaccinediff <- diff(usVaccines)
+plot(vaccinediff)
+
+
+DTP1 <-usVaccines[,1]
+DTP1cp <-cpt.mean(DTP1)
+DTP1cp
+plot(cpt.mean(diff(DTP1)))
+cpt.var(diff(DTP1))
+        
+HepB_BD   <-usVaccines[,2]
+HepB_BDcp <-cpt.mean(HepB_BD)
+HepB_BDcp
+plot(cpt.mean(diff(HepB_BD)))
+cpt.mean(diff(HepB_BD))
+cpt.var(diff(HepB_BD))
+
+
+
+ Pol3 <-usVaccines[,3]
+Pol3cp <-cpt.mean( Pol3)
+Pol3cp
+plot(cpt.mean(diff(Pol3)))
+cpt.mean(diff(Pol3))
+cpt.var(diff(Pol3))
+
+
+ Hib3 <-usVaccines[,4]
+Hib3cp <-cpt.mean( Hib3)
+Hib3cp
+plot(cpt.mean(diff(Hib3)))
+cpt.var(diff(Hib3))
+
+
+ MCV1 <-usVaccines[,5]
+MCV1cp <-cpt.mean(MCV1)
+MCV1cp 
+plot(cpt.mean(diff(MCV1)))
+cpt.var(diff(MCV1))
+```
+
+2.  What proportion of public schools reported vaccination data? What proportion of private schools reported vaccination data? Was there any credible difference in overall reporting proportions between public and private schools?
+
+```{r}
+
+
+#calculate table
+ schooltable <- table(allSchoolsReportStatus$pubpriv,allSchoolsReportStatus$reported)
+schooltable
+ 
+#calculate margin table
+
+ margin.table(schooltable)
+margin.table(schooltable,1)
+margin.table(schooltable,2)
+
+# Calculate probabilities 
+
+schoolProbs <- schooltable/margin.table(schooltable) 
+                                                         
+schoolProbs  
+
+ 
+
+```
+
+3.  What are 2013 vaccination rates for individual vaccines (i.e., DOT, Polio, MMR, and HepB) in California public schools? How do these rates for individual vaccines in California districts compare with overall US vaccination rates (make an informal comparison to the final observations in the time series)?
+
+```{r}
+
+plot(districts)
+
+summary(districts)
+
+
+ mean( districts$WithoutDTP )
+  districts$withDTP <- (100 - districts$WithoutDTP )
+ mean(districts$withDTP)
+ 
+ 
+ mean( districts$WithoutPolio )
+ districts$WithPolio <- (100 - districts$WithoutPolio )
+ mean( districts$WithPolio )
+
+ 
+ mean( districts$WithoutMMR )
+  districts$withMMR <- (100 - districts$WithoutMMR )
+ mean(districts$withMMR)
+  
+  mean( districts$WithoutHepB )
+    districts$withHepB<- (100 - districts$WithoutHepB )
+  mean( districts$withHepB )
+
+    
+mean(districts$PctUpToDate)
+summary(usVaccines)
+
+
+
+  
+```
+
+4.  Among districts, how are the vaccination rates for individual vaccines related? In other words, if students are missing one vaccine are they missing all of the others?
+
+```{r}
+
+
+cordist <- cor(districts[,2:6]) 
+cordist
+cordist1 <- cor(districts[,2:5]) 
+cordist1
+mean(cordist)
+mean(cordist1)
+
+
+quantile(cordist,probs=c(0.025,0.975))
+
+quantile(cordist1,probs=c(0.025,0.975))
+
+library(corrplot)
+x <- cor(districts[,2:6])
+corrplot(x, type="upper", order="hclust")
+
+x2 <- cor(districts[,2:5])
+corrplot(x2, type="upper", order="hclust")
+
+```
+
+5.  What variables predict whether or not a district's reporting was complete?
+
+```{r}
+
+glmOut <- glm(formula = DistrictComplete ~ PctChildPoverty + PctFreeMeal+ PctFamilyPoverty + Enrolled +TotalSchools, family  =binomial(), data =districts)
+
+
+summary(glmOut)
+
+glmOutExp <- exp(coef(glmOut))
+exp(confint(glmOutExp))
+```
+
+```{r}
+anova(glmOut, test="Chisq")
+```
+
+```{r}
+
+library(BaylorEdPsych) 
+PseudoR2(glmOut)
+```
+
+```{r}
+table(round(predict(glmOut, type="response")), districts$DistrictComplete)
+```
+
+```{r}
+#baysian approach
+library(MCMCpack)
+
+bayesLogitOut <- MCMClogit(DistrictComplete ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data = districts) 
+summary(bayesLogitOut)
+plot(bayesLogitOut)
+```
+
+6.  What variables predict the percentage of all enrolled students with completely up-to-date vaccines?
+
+```{r}
+#install.packages("car")
+library(car)
+#linear
+regOutvac <- lm(PctUpToDate ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data=districts)
+summary(regOutvac) 
+
+summary(residuals(regOutvac))
+
+vif(regOutvac)
+
+
+#bayesian
+regOutBvac <- lmBF(PctUpToDate ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data=districts) 
+regOutBvac
+
+
+
+regOutMCMCvac <- lmBF(PctUpToDate ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data=districts, posterior=TRUE, iterations=10000)
+summary(regOutMCMC)
+
+
+plot(regOutMCMCvac)
+
+```
+
+7.  What variables predict the percentage of all enrolled students with belief exceptions?
+
+```{r}
+
+regOutbelief <- lm(PctBeliefExempt ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data=districts)
+summary(regOutbelief) 
+
+summary(residuals(regOutbelief))
+
+
+regOutMCMCbelief <- lmBF(PctBeliefExempt ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data=districts, posterior=TRUE, iterations=10000)
+summary(regOutMCMCbelief)
+
+
+
+regOutBbelief <- lmBF(PctBeliefExempt ~ PctChildPoverty + PctFreeMeal + PctFamilyPoverty + Enrolled + TotalSchools, data=districts)
+regOutBbelief
+
+plot(regOutMCMCbelief)
+
+```

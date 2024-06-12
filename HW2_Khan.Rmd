@@ -1,0 +1,119 @@
+---
+title: "Homework 2"
+author: "Sana Khan"
+date: "2022-10-15"
+output: html_document
+---
+I produced the material below with assistance from our textbook and class lecture 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Flip a fair coin nine times and write down the number of heads obtained. Now repeat this process 100,000 times. Obviously you don’t want to have to do that by hand, so cre‐ ate the necessary lines of R code to do it for you. Hint: You will need both the rbinom() function and the table() function. Write down the results and explain in your own words what they mean.
+
+
+```{r}
+table(rbinom(n=1,size=9,prob=0.5) )
+```
+
+50% of the time the result was heads 
+```{r}
+table( rbinom(n=100000,size=9,prob=0.5) )
+table( rbinom(n=100000,size=9,prob=0.5))/100000
+hist(rbinom(n=100000,size=9,prob=0.5))
+```
+
+After running the trial 100,000 of filliping a coin 9 times, the highest likelihood to return a head was 4-5 times. You can see that this has a normal distribution, with having a head 3 or 6 times less likely. 
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+#2 
+Using the output from Exercise 1, summarize the results of your 100,000 trials of nine flips each in a bar plot using the appropriate commands in R. Convert the results to probabilities and represent that in a bar plot as well. Write a brief interpretive analysis that describes what each of these bar plots signifies and how the two bar plots are related. Make sure to comment on the shape of each bar plot and why you believe that the bar plot has taken that shape. Also make sure to say something about the center of the bar plot and why it is where it is.
+```{r}
+barplot(table(rbinom(n=100000,size=9,prob=0.5)))
+```
+The bar plot shows the results of the 100,000 trials. This plot has a normal distribution, with the changes of flipping a head being highest 4-5 times. Since this is a fair coin, this probability of getting a heads is about 50%. 
+
+```{r, echo=FALSE}
+probs <-table( rbinom(n=100000,size=9,prob=0.5))/100000
+barplot(probs)
+```
+This graph shows the probability instead of the count of returning a head. Since it's the same data, just shown as a probability, the distribution is the same. You can see from the probability table, that getting a head 4-5 times is about 50%. 
+--------------------------------------------------------------------------------------------------------------------------------
+
+#6 
+One hundred students took a statistics test. Fifty of them are high school students and 50 are college students. Eighty students passed and 20 students failed. You now have enough information to create a two‐by‐two contingency table with all of the marginal totals specified (although the four main cells of the table are still blank). Draw that table and write in the marginal totals. I’m now going to give you one additional piece of information that will fill in one of the four blank cells: only three college students failed the test. With that additional information in place, you should now be able to fill in the remaining cells of the two‐by‐two table. Comment on why that one additional piece of information was all you needed in order to figure out all four of the table’s main cells. Finally, create a second copy of the complete table, replacing the counts of students with probabilities. What is the pass rate for high school students? In other words, if one focuses only on high school students, what is the probability that a student will pass the test?
+
+```{r}
+
+
+test <- matrix(c(33,17,47,3),ncol=2,byrow=TRUE)
+  
+colnames(test) <- c('Pass','Fail') 
+rownames(test) <- c('High School','College')
+test <- as.table(test)
+test
+
+#Create margins
+margin.table(test)
+margin.table(test,1)
+margin.table(test,2)
+
+# Calculate probabilities 
+
+testProbs <- test/margin.table(test) 
+                                                         
+testProbs  
+
+#normalize the data set
+test[1,1]/sum(test[1,])
+
+                                                         
+```
+ The initial information given was enough to complete the margins. With the additional information of 3 college students failing, you can subtract 3 from 50 to get 47. That is enough information to fill in the remainder of the table, since you can subtract the values from the margins to fill in the rows/columns. The pass rate for highschool students is 66%
+ 
+ 
+
+--------------------------------------------------------------------------------------------------------------------------------
+#7 In a typical year, 71 out of 100,000 homes in the United Kingdom is repossessed by the bank because of mortgage default (the owners did not pay their mortgage for many months). Barclays Bank has developed a screening test that they want to use to predict whether a mortgagee will default. The bank spends a year collecting test data: 93,935 households pass the test and 6,065 households fail the test. Interestingly, 5,996 of those who failed the test were actually households that were doing fine on their mort‐ gage (i.e., they were not defaulting and did not get repossessed). Construct a complete contingency table from this information. Hint: The 5,996 is the only number that goes in a cell; the other numbers are marginal totals. What percentage of customers both pass the test and do not have their homes repossessed?
+
+```{r}
+mortage <- matrix(c(2,69,93933,5996),ncol=2,byrow=TRUE)
+  
+colnames(mortage) <- c('Pass','Fail') 
+rownames(mortage) <- c('Default','No Default')
+mortage <- as.table(mortage)
+mortage
+
+
+margin.table(mortage)
+margin.table(mortage,1)
+margin.table(mortage,2)
+
+# Calculate probabilities 
+
+mortageProbs <- mortage/margin.table(mortage) 
+                                                         
+mortageProbs  
+
+# how many passed but didn't get repo'd 
+ pass <-mortageProbs[2,1]
+ pass
+```
+
+
+About 94% of customers pass the test and do not have their house repossed 
+-------------------------------------------------------------------------------------------------------------------------------
+#8 Imagine that Barclays deploys the screening test from Exercise 6 on a new customer and the new customer fails the test. What is the probability that this customer will actu‐ ally default on his or her mortgage? Show your work and especially show the tables that you set up to help with your reasoning.
+```{r}
+defaultcustomer <-mortage[1,2]
+ defaultcustomer
+ 
+ totalfail <- margin.table(mortage,2)[2]
+ totalfail
+ 
+ 100 * defaultcustomer/totalfail
+```
+
+To understand the probability, you have to normalize the data which is to divide the number of defaulted customers who failed by the number of total failed customers. So the chance that a new customer who failed the test will default is 1.14

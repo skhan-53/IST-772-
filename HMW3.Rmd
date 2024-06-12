@@ -1,0 +1,112 @@
+---
+title: "Homework 3"
+author: "Sana Khan"
+date: "2022-10-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I consulted with our textbook to produce the below materials
+
+2**.Use the summary(ChickWeight) command to reveal basic information about the ChickWeight data set. You will find that ChickWeight contains four different variables. Name the four variables. Use the dim(ChickWeight) command to show the dimensions of the ChickWeight data set. The second number in the output, 4, is the number of col‐ umns in the data set, in other words the number of variables. What is the first number? Report it and describe briefly what you think it signifies.**
+
+```{r cars}
+summary(ChickWeight)
+dim(ChickWeight)
+```
+
+The four variables in the ChickWeight Data set are; Weight, Time, Chick and Diet. The first number, 578, represents the number of observations, or the number of rows in the data set.
+
+------------------------------------------------------------------------
+
+**3 Run the following commands, say what the command does, report the output, and briefly explain each piece of output:**
+
+The summary command is showing some of the central tendency and the range of values for the weight variable.
+
+```{r pressure, echo=FALSE}
+summary(ChickWeight$weight) 
+
+```
+
+The head command shows us the first five values for the observations in the weight variable.
+
+```{r}
+head(ChickWeight$weight) 
+
+```
+
+The mean is showing us the average weight for a chick. The output is 122
+
+```{r}
+mean(ChickWeight$weight) 
+
+```
+
+myChkWts is assigning all of the values for the weight variable to this new variable.
+
+```{r}
+myChkWts <- ChickWeight$weight
+
+```
+
+The quantile command breaks up our dataset into sections. In this case we are looking for the .5 or the median piece, which is 103
+
+```{r}
+quantile(myChkWts,0.50)
+```
+
+
+--------------------------------------------------------------------------------------------------------------
+#4 You can continue to use this myChkWts variable for the rest of the exercises below. Create a histogram for that variable. Then write code that will display the 2.5% and 97.5% quantiles of the distribution for that variable. Write an interpretation of the variable, including descriptions of the mean, median, shape of the distribution, and the 2.5% and 97.5% quantiles. Make sure to clearly describe what the 2.5% and 97.5% quantiles signify.
+
+```{r}
+hist(myChkWts)
+
+abline(v=quantile(myChkWts,0.025))
+
+abline(v=quantile(myChkWts,0.975))
+
+
+
+```
+
+The mean of the data set is 122 and the median is 103. The shape of the distribution shows it is skewed right, which is confirmed by the mean being larger than the median. The quantiles show how much of the distribution falls within the 2.5% of the data and how much falls within 97.5%. There is more data that falls in the 2.5 than the 97.5% based on the histogram. 
+
+
+-----------------------------------------------------------------------------------------------------------------#5 Write R code that will construct a sampling distribution of means from the weight data (as noted above, if you did exercise 3 you can use myChkWts instead of ChickWeight$weight to save yourself some typing). Make sure that the sampling distribution contains at least 1,000 means. Store the sampling distribution in a new variable that you can keep using. Use a sample size of n = 11 (sampling with replacement). Show a histogram of this distribution of sample means. Then, write and run R commands that will display the 2.5% and 97.5% quantiles of the sampling distribution on the histogram with a vertical line.
+
+
+```{r}
+
+samplingDistribution <- replicate(1000,mean(sample(myChkWts, 									size=11,replace=TRUE)),simplify=TRUE)
+
+hist(samplingDistribution)
+
+abline(v=quantile(samplingDistribution,0.025))
+
+abline(v=quantile(samplingDistribution,0.975))
+```
+
+
+-----------------------------------------------------------------------------------------------------------------
+#6 Briefly describe, from a conceptual perspective and in your own words, what the differ‐ ence is between a distribution of raw data and a distribution of sampling means. Finally, comment on why the 2.5% and 97.5% quantiles are so different between the raw data distribution and the sampling distribution of means.
+
+ The reason the distribution between the raw data and the sampling means is different is because the sampling means has a closer representation to the actual population mean. This is the reasoning behind the law of large numbers which also explains why the quantiles are less extreme.
+ 
+ ---------------------------------------------------------------------------------------------------------------
+#7 Redo Exercise 5, but this time use a sample size of n = 100 (instead of the original sample size of n = 11 used in Exercise 5). Explain why the 2.5% and 97.5% quantiles are different from the results you got for Exercise 5. As a hint, think about what makes a sample “better.”
+
+```{r}
+samplingDistribution2 <- replicate(1000,mean(sample(myChkWts, 									size=100,replace=TRUE)),simplify=TRUE)
+
+hist(samplingDistribution2)
+
+abline(v=quantile(samplingDistribution2,0.025))
+
+abline(v=quantile(samplingDistribution2,0.975))
+```
+
+The results are different because this is a larger population size so it has less outliers. A "better" sample would be a larger sample since it's more representative of the population. The quantiles have changed because we are less dispersed in the large sample size. 
